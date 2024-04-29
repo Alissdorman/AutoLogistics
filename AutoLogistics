@@ -1,0 +1,43 @@
+import os
+from openpyxl import load_workbook, Workbook
+
+def copy_and_rename_excel(source_dir, file_name):
+    # Construct the full path to the source Excel file
+    source_file_path = os.path.join(source_dir, file_name)
+    
+    # Check if the source file exists
+    if not os.path.exists(source_file_path):
+        print(f"The specified file '{file_name}' does not exist in the directory '{source_dir}'.")
+        return
+    
+    try:
+        # Load the source Excel file
+        wb_source = load_workbook(filename=source_file_path)
+        
+        # Create a new Excel workbook
+        wb_new = Workbook()
+        
+        # Copy the worksheets from the source to the new workbook
+        for sheet_name in wb_source.sheetnames:
+            ws_source = wb_source[sheet_name]
+            ws_new = wb_new.create_sheet(title=sheet_name)
+            for row in ws_source.iter_rows(values_only=True):
+                ws_new.append(row)
+        
+        # Specify the new file name
+        new_file_name = "new Copy.xlsx"
+        
+        # Construct the full path to the destination Excel file
+        destination_file_path = os.path.join(source_dir, new_file_name)
+        
+        # Save the new workbook with the new file name
+        wb_new.save(destination_file_path)
+        
+        print(f"Excel file '{file_name}' copied and renamed to '{new_file_name}' successfully.")
+    except Exception as e:
+        print(f"An error occurred while copying and renaming the Excel file: {e}")
+
+# Example usage:
+source_directory = "/path/to/source_directory"
+excel_file_to_copy = "example.xlsx"
+copy_and_rename_excel(source_directory, excel_file_to_copy)
