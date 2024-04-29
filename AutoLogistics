@@ -3,7 +3,7 @@ import shutil
 from openpyxl import load_workbook, Workbook
 
 
-def find_excel_and_copy_rename(directory, string):
+def find_excel_and_copy_rename(directory, level):
     # Check if the specified directory exists
     if not os.path.isdir(directory):
         print("Error: The specified directory does not exist.")
@@ -12,10 +12,10 @@ def find_excel_and_copy_rename(directory, string):
     # Iterate through files in the directory
     for filename in os.listdir(directory):
         if filename.endswith(".xlsx") or filename.endswith(".xls"):
-            if string in filename:
+            if level in filename:
                 # Construct the source and destination paths
                 source_path = os.path.join(directory, filename)
-                new_filename = f"new_{filename}"  # New filename
+                new_filename = f"{part_number} Logistics"  # New filename
                 destination_path = os.path.join(directory, new_filename)
                 
                 # Copy and rename the file
@@ -26,21 +26,23 @@ def find_excel_and_copy_rename(directory, string):
                     print(f"An error occurred while copying and renaming the file '{filename}': {e}")
 
 # Example usage:
-specified_directory = "/path/to/directory"  # Specify the directory path
-specific_string = input("Enter the specific 4-character string to search for: ")  # User input
-find_excel_and_copy_rename(specified_directory, specific_string)
+specified_directory = input("Template Folder Path: ")  # Specify the directory path
+level = input("Managed Level: ")  # User input
+find_excel_and_copy_rename(specified_directory, level)
 
 
-def auto_fill_excel_existing(existing_file, sheet_name1, sheet_name2, sheet_name3, part_numbers):
+def auto_fill_excel_existing(directory, level, existing_file, sheet_name1, sheet_name2, sheet_name3, part_numbers):
     # Load the existing workbook
     sheet_name1= "Request Details"
     sheet_name2= "General Details"
     sheet_name3= "Image"
 
-    list_of_part_numbers = part_numbers.toPlainText().splitlines()
-        for line in list_of_part_numbers:
-            line = line.strip()
-            part_number = line
+    existing_file = find_excel_and_copy_rename(directory, level)
+
+ #   list_of_part_numbers = part_numbers.toPlainText().splitlines()
+  #      for line in list_of_part_numbers:
+   #         line = line.strip()
+   #         part_number = line
 
     try:
         wb = load_workbook(existing_file)
@@ -88,6 +90,8 @@ def auto_fill_excel_existing(existing_file, sheet_name1, sheet_name2, sheet_name
     print("Excel file updated successfully.")
 
 # Call the function to execute
-existing_excel_file = "existing_file.xlsx"  # Specify the existing Excel file path
-sheet_name = "Sheet1"  # Specify the target sheet name
-auto_fill_excel_existing(existing_excel_file, sheet_name)
+existing_excel_file = find_excel_and_copy_rename(directory, level)  # Specify the existing Excel file path
+sheet_name1= "Request Details"
+sheet_name2= "General Details"
+sheet_name3= "Image"
+auto_fill_excel_existing(existing_excel_file, sheet_name1, sheet_name2, sheet_name3)
