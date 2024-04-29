@@ -1,43 +1,93 @@
 import os
+import shutil
 from openpyxl import load_workbook, Workbook
 
-def copy_and_rename_excel(source_dir, file_name):
-    # Construct the full path to the source Excel file
-    source_file_path = os.path.join(source_dir, file_name)
-    
-    # Check if the source file exists
-    if not os.path.exists(source_file_path):
-        print(f"The specified file '{file_name}' does not exist in the directory '{source_dir}'.")
+
+def find_excel_and_copy_rename(directory, string):
+    # Check if the specified directory exists
+    if not os.path.isdir(directory):
+        print("Error: The specified directory does not exist.")
         return
     
-    try:
-        # Load the source Excel file
-        wb_source = load_workbook(filename=source_file_path)
-        
-        # Create a new Excel workbook
-        wb_new = Workbook()
-        
-        # Copy the worksheets from the source to the new workbook
-        for sheet_name in wb_source.sheetnames:
-            ws_source = wb_source[sheet_name]
-            ws_new = wb_new.create_sheet(title=sheet_name)
-            for row in ws_source.iter_rows(values_only=True):
-                ws_new.append(row)
-        
-        # Specify the new file name
-        new_file_name = "new Copy.xlsx"
-        
-        # Construct the full path to the destination Excel file
-        destination_file_path = os.path.join(source_dir, new_file_name)
-        
-        # Save the new workbook with the new file name
-        wb_new.save(destination_file_path)
-        
-        print(f"Excel file '{file_name}' copied and renamed to '{new_file_name}' successfully.")
-    except Exception as e:
-        print(f"An error occurred while copying and renaming the Excel file: {e}")
+    # Iterate through files in the directory
+    for filename in os.listdir(directory):
+        if filename.endswith(".xlsx") or filename.endswith(".xls"):
+            if string in filename:
+                # Construct the source and destination paths
+                source_path = os.path.join(directory, filename)
+                new_filename = f"new_{filename}"  # New filename
+                destination_path = os.path.join(directory, new_filename)
+                
+                # Copy and rename the file
+                try:
+                    shutil.copy(source_path, destination_path)
+                    print(f"Excel file '{filename}' copied and renamed to '{new_filename}'.")
+                except Exception as e:
+                    print(f"An error occurred while copying and renaming the file '{filename}': {e}")
 
 # Example usage:
-source_directory = "/path/to/source_directory"
-excel_file_to_copy = "example.xlsx"
-copy_and_rename_excel(source_directory, excel_file_to_copy)
+specified_directory = "/path/to/directory"  # Specify the directory path
+specific_string = input("Enter the specific 4-character string to search for: ")  # User input
+find_excel_and_copy_rename(specified_directory, specific_string)
+
+
+def auto_fill_excel_existing(existing_file, sheet_name1, sheet_name2, sheet_name3, part_numbers):
+    # Load the existing workbook
+    sheet_name1= "Request Details"
+    sheet_name2= "General Details"
+    sheet_name3= "Image"
+
+    list_of_part_numbers = part_numbers.toPlainText().splitlines()
+        for line in list_of_part_numbers:
+            line = line.strip()
+            part_number = line
+
+    try:
+        wb = load_workbook(existing_file)
+    except FileNotFoundError:
+        print("Error: The specified Excel file does not exist.")
+        return
+    
+    # Check if the target sheet exists, otherwise create it
+    if sheet_name1 in wb.sheetnames:
+        ws1 = wb[sheet_name1]
+    else:
+        print(f"Error: The sheet '{sheet_name1}' does not exist in the Excel file.")
+        return
+
+    if sheet_name2 in wb.sheetnames:
+        ws2 = wb[sheet_name2]
+     else:
+        print(f"Error: The sheet '{sheet_name2}' does not exist in the Excel file.")
+        return
+
+    if sheet_name2 in wb.sheetnames:
+        ws2 = wb[sheet_name3]
+     else:
+        print(f"Error: The sheet '{sheet_name3}' does not exist in the Excel file.")
+        return
+
+    # Get inputs from the user
+    Date = input("Enter the Date: ")
+    Requestor = input("Enter the Requestor: ")
+    EPC = input("Enter the Engineering Point of Contact: ")
+    SBU = input("Enter the SBU: ")
+    Part_Number = input("Enter the Part Number(s): ")
+    Image = input("Upload the image(s): ")
+    
+    # Fill cells with inputs
+    ws1['A2'] = Date
+    ws1['B2'] = Requestor
+    ws1['C2'] = EPC
+    ws1['D2'] = SBU
+    ws2['A2'] = Part_Number
+    ws3['B2'] = Image
+    
+    # Save the changes to the Excel file
+    wb.save(existing_file)
+    print("Excel file updated successfully.")
+
+# Call the function to execute
+existing_excel_file = "existing_file.xlsx"  # Specify the existing Excel file path
+sheet_name = "Sheet1"  # Specify the target sheet name
+auto_fill_excel_existing(existing_excel_file, sheet_name)
